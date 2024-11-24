@@ -1,13 +1,30 @@
 <?php
 $host = 'localhost';
 $username = 'lab5_user';
-$password = '';
+$password = 'password123';
 $dbname = 'world';
 
 $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-$stmt = $conn->query("SELECT * FROM countries");
 
-$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+if (isset($_GET['country'])) {
+  // echo "check country";
+  $country = $_GET['country'];
+  // echo $country;
+
+  // Prepare the SQL statement with a placeholder for the country name
+  $stmt = $conn->prepare("SELECT * FROM countries WHERE name LIKE :country");
+  // Use '%' wildcards for partial matching, and bind the country name to the placeholder
+  $country = "%$country%";
+  $stmt->bindParam(':country', $country, PDO::PARAM_STR);
+  // Execute the prepared statement
+  $stmt->execute();
+  // Fetch the results
+  $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+  // If 'country' GET variable is not set, select all countries
+  $stmt = $conn->query("SELECT * FROM countries");
+  $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 ?>
 <ul>
