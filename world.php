@@ -11,6 +11,54 @@ if (isset($_GET['country'])) {
   $country = htmlspecialchars($_GET['country']);
   // echo $country;
 
+  if (isset($_GET['lookup'])) {
+
+    try {
+
+      // echo "rached here";
+      // Prepare the SQL statement with a placeholder for the country name
+      $stmt = $conn->prepare("SELECT cities.name, cities.district, cities.population FROM cities JOIN countries ON cities.country_code = countries.code WHERE countries.name LIKE :country");
+      // Use '%' wildcards for partial matching, and bind the country name to the placeholder
+      $country = "%$country%";
+      // echo $country;
+      $stmt->bindParam(':country', $country, PDO::PARAM_STR);
+      // Execute the prepared statement
+      $stmt->execute();
+      // Fetch the results
+      $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      // if (empty($results)) {
+      //   echo "No results found for the given country.";
+      // } else {
+      //   print_r($results); // Debug: Print the results
+      // }
+    } catch (PDOException $e) {
+      echo "SQL Error: " . $e->getMessage();
+    }
+
+
+    // echo "after sql";
+    // echo $results;
+
+
+    echo '<table>
+  <tr>
+    <th>Name</th>
+    <th>District</th>
+    <th>Population</th>
+  </tr>';
+    foreach ($results as $row) {
+      echo '<tr>
+      <td>' . $row['name'] . '</td>
+      <td>' . $row['district'] . '</td>
+      <td>' . $row['population'] . '</td>
+    </tr>';
+    }
+    echo '</table>';
+
+    exit();
+  }
+
   // Prepare the SQL statement with a placeholder for the country name
   $stmt = $conn->prepare("SELECT * FROM countries WHERE name LIKE :country");
   // Use '%' wildcards for partial matching, and bind the country name to the placeholder
